@@ -1,13 +1,11 @@
 import streamlit as st
-import openai
-import os
+from openai import OpenAI
 
-st.set_page_config(page_title="IT 센싱 리포트 생성기", layout="wide")
+st.set_page_config(page_title="IT 리포트 생성기", layout="wide")
 st.title("📊 Weekly IT 센싱 리포트 생성기")
 
 openai_api_key = st.text_input("🔑 OpenAI API 키 입력", type="password")
-
-topic = st.text_input("📌 키워드 (예: 로봇, 전고체배터리 등)")
+topic = st.text_input("📌 키워드 (예: 로봇, 전고체배터리)")
 period = st.selectbox("🗓️ 분석 기간", ["1주", "2주", "1달"])
 
 if st.button("리포트 생성하기"):
@@ -16,7 +14,8 @@ if st.button("리포트 생성하기"):
     elif not topic:
         st.warning("키워드를 입력해주세요.")
     else:
-        openai.api_key = openai_api_key
+        client = OpenAI(api_key=openai_api_key)
+
         prompt = f"""
         다음 키워드에 대해 최근 {period} 간의 뉴스 동향을 분석해서 요약해줘.
         키워드: {topic}
@@ -28,7 +27,7 @@ if st.button("리포트 생성하기"):
         """
 
         with st.spinner("GPT가 리포트를 작성 중입니다..."):
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[{"role": "user", "content": prompt}]
             )
